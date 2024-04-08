@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  fluent-bit:
+    image: fluent/fluent-bit
+    hostname: fluent-bit
+    volumes:
+      - $PWD/infrastructure/efk/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    ports:
+      - 24224
+    depends_on:
+      - elasticsearch
+    networks:
+      - fluent-bit-net
+
+networks:
+  fluent-bit-net:
+    external: true
+    name: bigsizeship-net
