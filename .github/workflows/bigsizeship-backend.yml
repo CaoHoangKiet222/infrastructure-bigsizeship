@@ -11,7 +11,7 @@ on:
         description: '[Mandatory] SELECT ENVIRONMENT'    
         options:
         - stag
-        - product
+        - prod
       GIT_TAG:
         description: '[Mandatory] GIT TAG (Ex: 1.0.0(1))'    
         required: false
@@ -43,13 +43,13 @@ jobs:
 #=============== CI/CD stag environment ===============#
   bigsizeship-backend-STAG-build:
     name: bigsizeship-backend STAG build
-    if: ${{ github.event.inputs.ENV == 'stag' }}
+    if: ${{ github.event.inputs.env == 'stag' }}
     runs-on: ubuntu-latest
     outputs:
       job_status: ${{ job.status }}
 
     steps:
-    - name: Checkout infras
+    - name: Checkout
       uses: actions/checkout@v4
 
     - name: Build, tag & push docker image
