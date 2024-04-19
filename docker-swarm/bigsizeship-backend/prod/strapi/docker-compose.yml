@@ -1,0 +1,52 @@
+# https://stackoverflow.com/questions/54412190/docker-swarm-not-exposing-port
+version: "3"
+services:
+  strapi:
+    image: ${IMAGE_TAG:-caotuankietc3a/bigsizeship:latest_prod}
+    hostname: strapi
+    ports:
+      - 1337
+    networks:
+      - strapi-net
+    depends_on:
+      - redis
+      - fluent-bit
+    deploy:
+      mode: replicated
+      replicas: ${REPLICA:-2}
+      restart_policy:
+        condition: on-failure
+        # delay: 5s
+        # max_attempts: 10
+        # window: 120s
+      update_config:
+        parallelism: 1
+        delay: 30s
+        order: start-first
+        # failure_action: rollback
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.strapi.rule=PathPrefix(`/`)
+        - traefik.http.routers.strapi.entrypoints=web
+        - traefik.docker.network=bigsizeship-net
+        - traefik.http.routers.strapi.service=strapi
+        - traefik.http.services.strapi.loadbalancer.server.port=1337
+        - traefik.http.services.strapi.loadbalancer.healthcheck.path=/_health
+        - traefik.http.services.strapi.loadbalancer.healthcheck.port=1337
+        - traefik.http.services.strapi.loadbalancer.healthcheck.interval=30s
+        - traefik.http.services.strapi.loadbalancer.healthcheck.timeout=5s
+
+    # Can use secrets instead and secrets store in /run/secrets/<secret_name>
+    secrets:
+      - source: bigsizeship-secret
+        target: /opt/app/.env
+
+# Can use secrets instead and secrets store in /run/secrets/<secret_name>
+secrets:
+  bigsizeship-secret:
+    external: true
+
+networks:
+  strapi-net:
+    external: true
+    name: bigsizeship-net
