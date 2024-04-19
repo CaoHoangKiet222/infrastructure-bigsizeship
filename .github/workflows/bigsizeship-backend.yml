@@ -17,7 +17,7 @@ on:
         description: '[Mandatory] GIT TAG (Ex: 1.0.0.1)'
         required: false
       COMMIT_ID:
-        description: '[Optional] Commit ID '    
+        description: '[Optional] Commit ID'
         required: false     
       COMMIT_AUTHOR:
         description: '[Optional] AUTHOR'    
@@ -26,7 +26,7 @@ on:
         description: '[Mandatory] DOCKER TAG (Ex: 1.0.0.1)'    
         required: false
       DOCKER_CONTEXT:
-        description: "Optional input to set docker context."
+        description: "Optional input to set docker context"
         required: false
         type: string
         default: "."
@@ -35,7 +35,7 @@ jobs:
 #=============== CI/CD stag environment ===============#
   bigsizeship-backend-STAG-build:
     name: bigsizeship-backend STAG build
-    if: ${{ github.event.inputs.env == 'stag' }}
+    if: ${{ github.event.inputs.ENV == 'stag' }}
     runs-on: ubuntu-latest
     outputs:
       job_status: ${{ job.status }}
@@ -48,7 +48,7 @@ jobs:
         with:
           env: ${{ github.event.inputs.ENV }}
 
-        
+
   bigsizeship-backend-STAG-deploy:
     name: bigsizeship-backend STAG deploy
     needs: bigsizeship-backend-STAG-build
