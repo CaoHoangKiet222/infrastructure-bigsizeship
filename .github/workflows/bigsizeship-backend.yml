@@ -6,6 +6,7 @@ on:
       PROJECT_NAME:
         description: 'PROJECT NAME (Ex: bigsizeship-backend)'    
         required: false
+        default: "bigsizeship-backend"
       ENV:
         type: choice
         description: '[Mandatory] SELECT ENVIRONMENT'    
@@ -13,7 +14,7 @@ on:
         - stag
         - prod
       GIT_TAG:
-        description: '[Mandatory] GIT TAG (Ex: 1.0.0(1))'    
+        description: '[Mandatory] GIT TAG (Ex: 1.0.0.1)'
         required: false
       COMMIT_ID:
         description: '[Optional] Commit ID '    
@@ -28,16 +29,14 @@ on:
         description: "Optional input to set docker context."
         required: false
         type: string
-        default: "./build/Dockerfiles/bigsizeship-backend/Dockerfile"
-      
+        default: "."
+
 env:
   PROJECT_NAME: "bigsizeship-backend"
-  IMAGE_NAME: "bigsizeship-backend"
   COMMIT_ID: ${{ github.event.inputs.COMMIT_ID }}
   COMMIT_AUTHOR: ${{ github.event.inputs.COMMIT_AUTHOR }}
   GIT_TAG: ${{ github.event.inputs.GIT_TAG }}
   IMAGE_TAG: ${{ github.event.inputs.IMAGE_TAG }}
-  APP_NAME: "bigsizeship-backend"
 
 jobs:
 #=============== CI/CD stag environment ===============#
@@ -47,15 +46,14 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       job_status: ${{ job.status }}
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Build, tag & push docker image
-      uses: ./.github/actions/${{ env.PROJECT_NAME }}/build.yml
-      with:
-        env: ${{ github.event.inputs.ENV }}
+      - name: Build, tag & push docker image
+        uses: ./.github/actions/${{ github.event.inputs.PROJECT_NAME }}/build.yml
+        with:
+          env: ${{ github.event.inputs.ENV }}
 
         
   bigsizeship-backend-STAG-deploy:
@@ -63,16 +61,16 @@ jobs:
     needs: bigsizeship-backend-STAG-build
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Deploy
-      uses: ./.github/actions/${{ env.PROJECT_NAME }}/deploy.yml
-      with:
-        env: ${{ github.event.inputs.ENV }}
-        tag: ${{ env.IMAGE_TAG }}
-        stack_name: bigsizeship_be_production
- 
-    # Clean Workspace
-    - name: Clean Workspace
-      uses: AutoModality/action-clean@v1
+      - name: Deploy
+        uses: ./.github/actions/${{ github.event.inputs.PROJECT_NAME }}/deploy.yml
+        with:
+          env: ${{ github.event.inputs.ENV }}
+          tag: ${{ env.IMAGE_TAG }}
+          stack_name: bigsizeship_be_staging
+
+      # Clean Workspace
+      - name: Clean Workspace
+        uses: AutoModality/action-clean@v1
