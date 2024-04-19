@@ -31,13 +31,6 @@ on:
         type: string
         default: "."
 
-env:
-  PROJECT_NAME: "bigsizeship-backend"
-  COMMIT_ID: ${{ github.event.inputs.COMMIT_ID }}
-  COMMIT_AUTHOR: ${{ github.event.inputs.COMMIT_AUTHOR }}
-  GIT_TAG: ${{ github.event.inputs.GIT_TAG }}
-  IMAGE_TAG: ${{ github.event.inputs.IMAGE_TAG }}
-
 jobs:
 #=============== CI/CD stag environment ===============#
   bigsizeship-backend-STAG-build:
@@ -68,7 +61,7 @@ jobs:
         uses: ./.github/actions/${{ github.event.inputs.PROJECT_NAME }}/deploy.yml
         with:
           env: ${{ github.event.inputs.ENV }}
-          tag: ${{ env.IMAGE_TAG }}
+          tag: ${{ github.event.inputs.IMAGE_TAG }}
           stack_name: bigsizeship_be_staging
 
       # Clean Workspace
