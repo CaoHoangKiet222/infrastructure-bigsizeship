@@ -22,6 +22,14 @@ inputs:
     description: "Optional input to not use cache when building the image."
     required: false
     default: "false"
+  env:
+    type: choise
+    description: "Optional environment"
+    required: false
+    options: 
+    - stag
+    - prod
+
 
 outputs: 
   image-tag:
@@ -72,7 +80,7 @@ runs:
           tags: ${{ steps.github-metadata.outputs.tags }}
           labels: ${{ steps.github-metadata.outputs.labels }}
           no-cache: ${{ inputs.no_cache }}
-          file: ${{  }}
+          file: ${{ inputs.context }}/build/Dockerfiles/bigsizeship-backend/Dockerfile
           # use layer caching. Don't forget mode=max to also cache the build image
           # (vs only the final image - mode: min)
           cache-from: type=gha

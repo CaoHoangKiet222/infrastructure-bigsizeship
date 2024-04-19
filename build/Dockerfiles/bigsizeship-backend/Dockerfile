@@ -1,8 +1,4 @@
 FROM node:18
-# Set environment variables
-ARG NODE_ENV=staging
-ENV NODE_ENV=${NODE_ENV}
-
 # Set the working directory and copy the necessary files
 WORKDIR /opt/
 COPY package*.json ./

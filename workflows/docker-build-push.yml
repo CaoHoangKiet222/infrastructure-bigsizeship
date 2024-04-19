@@ -29,6 +29,13 @@ on:
         description: "Whether to publish the image to Github Container Registry."
         required: false
         default: false
+      env:
+        type: choise
+        description: "Optional environment"
+        required: false
+        options: 
+        - stag
+        - prod
 
 
 jobs:
@@ -43,8 +50,9 @@ jobs:
           fetch-depth: ${{inputs.git-ref}} && 0 || 1 # In git-ref case: fetch all history for all branches and tags
 
       - name: Build, tag & push docker image
-        uses: BigsizeShip/infrastructure/.github/actions/docker-build-tag-push
+        uses: caotuankietc3a/infrastructure/.github/actions/docker-build-tag-push
         with:
-          docker-context: ${{inputs.docker-context}}
-          docker-platforms: ${{inputs.docker-platforms}}
-          publish_to_github_cr: ${{inputs.publish_to_github_cr}}
+          docker-context: ${{ inputs.docker-context }}
+          docker-platforms: ${{ inputs.docker-platforms }}
+          publish_to_github_cr: ${{ inputs.publish_to_github_cr }}
+          env: ${{ inputs.env }}
