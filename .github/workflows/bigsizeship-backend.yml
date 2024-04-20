@@ -43,27 +43,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build, tag & push docker image
-        uses: ./.github/actions/${{ github.event.inputs.project-name }}@master
-        with:
-          env: ${{ github.event.inputs.env }}
-
-
-  bigsizeship-backend-STAG-deploy:
-    name: bigsizeship-backend STAG deploy
-    needs: bigsizeship-backend-STAG-build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Deploy
-        uses: ./.github/actions/${{ github.event.inputs.project-name }}@master
-        with:
-          env: ${{ github.event.inputs.env }}
-          tag: ${{ github.event.inputs.image-tag }}
-          stack_name: bigsizeship_be_staging
-
-      # Clean Workspace
-      - name: Clean Workspace
-        uses: AutoModality/action-clean@v1
+#      - name: Build, tag & push docker image
+#        uses: ./.github/actions/${{ github.event.inputs.project-name }}@master
+#        with:
+#          env: ${{ github.event.inputs.env }}
+#
+#
+#  bigsizeship-backend-STAG-deploy:
+#    name: bigsizeship-backend STAG deploy
+#    needs: bigsizeship-backend-STAG-build
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Deploy
+#        uses: ./.github/actions/${{ github.event.inputs.project-name }}@master
+#        with:
+#          env: ${{ github.event.inputs.env }}
+#          tag: ${{ github.event.inputs.image-tag }}
+#          stack_name: bigsizeship_be_staging
+#
+#      # Clean Workspace
+#      - name: Clean Workspace
+#        uses: AutoModality/action-clean@v1
