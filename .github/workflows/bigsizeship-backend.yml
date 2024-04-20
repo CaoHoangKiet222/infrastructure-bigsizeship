@@ -35,11 +35,14 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       job-status: ${{ job.status }}
+      image-name: ${{ steps.build-tag-push-image.outputs.image-name }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Build, tag & push docker image
+        id: build-tag-push-image
         uses: ./.github/actions/bigsizeship-backend/build
         with:
           ENV: ${{ inputs.ENV }}
