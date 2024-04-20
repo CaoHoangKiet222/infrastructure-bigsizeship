@@ -31,12 +31,14 @@ runs:
 #          password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Pull Docker Image
+      shell: bash
       id: pull
       run: |
         image=ghcr.io/${{ github.repository }}
         docker pull $image:${{ inputs.IMAGE_TAG }}
 
     - name: Run/Update stack services
+      shell: bash
       run: |
         # Add commands to run tests on the deployed services
         docker_compose_yml="docker-compose.${{ inputs.ENV }}.yml"
