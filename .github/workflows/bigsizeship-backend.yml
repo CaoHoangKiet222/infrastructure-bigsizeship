@@ -3,29 +3,29 @@ name: Build and Deploy BigsizeShip-Backend
 on:
   workflow_dispatch:
     inputs: 
-      project-name:
+      PROJECT_NAME:
         description: 'PROJECT NAME (Ex: bigsizeship-backend)'    
         required: false
         default: "bigsizeship-backend"
-      env:
+      ENV:
         type: choice
-        description: '[Mandatory] SELECT environment'
+        description: '[Mandatory] SELECT ENVIRONMENT'
         options:
         - stag
         - prod
-      git-tag:
+      GIT_TAG:
         description: '[Mandatory] GIT TAG (Ex: 1.0.0.1)'
         required: false
-      commit-id:
+      COMMIT_ID:
         description: '[Optional] Commit ID'
         required: false     
-      commit-author:
+      COMMIT_AUTHOR:
         description: '[Optional] AUTHOR'    
         required: false   
-      image-tag:
+      IMAGE_TAG:
         description: '[Mandatory] DOCKER TAG (Ex: 1.0.0.1)'    
         required: false
-      docker-context:
+      DOCKER_CONTEXT:
         description: "Optional input to set docker context"
         required: false
         type: string
@@ -35,7 +35,7 @@ jobs:
 #=============== CI/CD stag environment ===============#
   bigsizeship-backend-STAG-build:
     name: bigsizeship-backend STAG build
-    if: ${{ github.event.inputs.env == 'stag' }}
+    if: ${{ github.event.inputs.ENV == 'stag' }}
     runs-on: ubuntu-latest
     outputs:
       job_status: ${{ job.status }}
@@ -43,12 +43,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-#      - name: Build, tag & push docker image
-#        uses: ./.github/actions/${{ github.event.inputs.project-name }}@master
+      - name: Build, tag & push docker image
+        uses: ./.github/actions/${{ github.event.inputs.PROJECT_NAME }}@master
 #        with:
-#          env: ${{ github.event.inputs.env }}
-#
-#
+#          env: ${{ github.event.inputs.ENV }}
+
+
 #  bigsizeship-backend-STAG-deploy:
 #    name: bigsizeship-backend STAG deploy
 #    needs: bigsizeship-backend-STAG-build
@@ -58,10 +58,10 @@ jobs:
 #        uses: actions/checkout@v4
 #
 #      - name: Deploy
-#        uses: ./.github/actions/${{ github.event.inputs.project-name }}@master
+#        uses: ./.github/actions/${{ github.event.inputs.PROJECT_NAME }}@master
 #        with:
-#          env: ${{ github.event.inputs.env }}
-#          tag: ${{ github.event.inputs.image-tag }}
+#          env: ${{ github.event.inputs.ENV }}
+#          tag: ${{ github.event.inputs.IMAGE_TAG }}
 #          stack_name: bigsizeship_be_staging
 #
 #      # Clean Workspace
