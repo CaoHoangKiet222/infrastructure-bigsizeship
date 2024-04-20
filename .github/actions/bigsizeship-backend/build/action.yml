@@ -2,6 +2,9 @@ name: Build, tag, push docker image
 description: Build, tag & push docker image
 
 inputs:
+  PROJECT_NAME:
+    description: 'PROJECT NAME (Ex: bigsizeship-backend)'
+    required: true
   PUBLISH_TO_GITHUB_CR:
     type: boolean
     description: "Whether to publish the image to Github Container Registry"
@@ -19,16 +22,13 @@ inputs:
     description: "Optional input to not use cache when building the image"
     required: false
     default: "false"
-  env:
+  ENV:
     type: choise
     description: "Optional environment"
     required: false
     options: 
       - stag
       - prod
-
-env:
-  PROJECT_NAME: "bigsizeship-backend"
 
 outputs: 
   image-tag:

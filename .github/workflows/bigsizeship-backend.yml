@@ -41,7 +41,8 @@ jobs:
       - name: Build, tag & push docker image
         uses: ./.github/actions/bigsizeship-backend/build
         with:
-          env: ${{ inputs.ENV }}
+          ENV: ${{ inputs.ENV }}
+          PROJECT_NAME: ${{ inputs.PROJECT_NAME }}
 
 
   bigsizeship-backend-STAG-deploy:
