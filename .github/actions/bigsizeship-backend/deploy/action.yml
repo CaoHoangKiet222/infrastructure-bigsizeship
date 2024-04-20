@@ -21,48 +21,50 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Login to Docker Registry
-      uses: docker/login-action@v3
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Copy files to VPS
+      uses: appleboy/scp-action@v0.1.7
       with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ github.token }}
-        # password: ${{ secrets.GITHUB_TOKEN }}
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        password: ${{ secrets.VPS_PASSWORD }}
+        port: ${{ secrets.PORT }}
+        source: "./docker-swarm/${{ inputs.PROJECT_NAME }}/*"
+        target: "~/app/${{ inputs.PROJECT_NAME }}"
 
-    - name: Extract Docker metadata
-      id: github-metadata
-      uses: docker/metadata-action@v4
+    - name: Deploy in VPS
+      uses: appleboy/ssh-action@v1.0.3
       with:
-        images: ghcr.io/${{ github.repository }}
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        password: ${{ secrets.VPS_PASSWORD }}
+        port: ${{ secrets.VPS_PORT }}
+        script: |
+          echo ${{ github.token }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker pull ${{ inputs.IMAGE_NAME }}
+          cd ~/app/${{ inputs.PROJECT_NAME }}
+          
+          # Add commands to run tests on the deployed services
+          docker_compose_yml="docker-compose.${{ inputs.ENV }}.yml"
+          compose_files=(
+            "./docker-swarm/${{ inputs.PROJECT_NAME }}/global/efk/fluent-bit/docker-compose.yml"
+            $([ ${{ inputs.ENV }} == "stag" ] && echo "./docker-swarm/${{ inputs.PROJECT_NAME }}/postgres/docker-compose.yml")
+            "./docker-swarm/${{ inputs.PROJECT_NAME }}/global/redis/docker-compose.yml"
+            "./docker-swarm/${{ inputs.PROJECT_NAME }}/strapi/${{ inputs.ENV }}/docker-compose.yml"
+          )
 
-    - name: Pull Docker Image
-      shell: bash
-      id: pull
-      run: |
-        docker pull ${{ inputs.IMAGE_NAME }}
-
-    - name: Run/Update stack services
-      shell: bash
-      run: |
-        # Add commands to run tests on the deployed services
-        docker_compose_yml="docker-compose.${{ inputs.ENV }}.yml"
-        compose_files=(
-            "$PWD/docker-swarm/${{ inputs.PROJECT_NAME }}/global/efk/fluent-bit/docker-compose.yml"
-            $([ ${{ inputs.ENV }} == "stag" ] && echo "$PWD/docker-swarm/${{ inputs.PROJECT_NAME }}/postgres/docker-compose.yml")
-            "$PWD/docker-swarm/${{ inputs.PROJECT_NAME }}/global/redis/docker-compose.yml"
-            "$PWD/docker-swarm/${{ inputs.PROJECT_NAME }}/strapi/${{ inputs.ENV }}/docker-compose.yml"
-        )
-
-        compose_yml=""
-        for file in "${compose_files[@]}"; do
+          compose_yml=""
+          for file in "${compose_files[@]}"; do
             compose_yml="${compose_yml:+${compose_yml} }-c ${file}"
-        done
-        echo "Compose yml files: ${compose_yml}"
+          done
+          echo "Compose yml files: ${compose_yml}"
 
-        docker stack deploy -c ./docker-swarm/${{ inputs.PROJECT_NAME }}/${{ inputs.ENV }}/reverse-proxy-traefik/docker-compose.yml --prune ${{ inputs.STACK_NAME }}_proxy
+          docker stack deploy -c ./docker-swarm/${{ inputs.PROJECT_NAME }}/${{ inputs.ENV }}/reverse-proxy-traefik/docker-compose.yml --prune ${{ inputs.STACK_NAME }}_proxy
 
-        docker stack config ${compose_yml} > ${docker_compose_yml}
+          docker stack config ${compose_yml} > ${docker_compose_yml}
 
-        docker stack deploy -c ${docker_compose_yml} --prune --with-registry-auth ${{ inputs.STACK_NAME }}
+          docker stack deploy -c ${docker_compose_yml} --prune --with-registry-auth ${{ inputs.STACK_NAME }}
 
-        docker service ls
+          docker service ls
