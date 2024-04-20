@@ -9,7 +9,7 @@ inputs:
     type: boolean
     description: "Whether to publish the image to Github Container Registry"
     required: false
-    default: false
+    default: true
   DOCKER_CONTEXT:
     description: "Optional input to set docker context"
     required: false
@@ -42,10 +42,7 @@ outputs:
 runs: 
   using: composite
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up QEMU 
+    - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
 
     - name: Set up Docker Buildx
