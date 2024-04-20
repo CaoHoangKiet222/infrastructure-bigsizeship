@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build, tag & push docker image
-        uses: $GITHUB_WORKSPACE/.github/actions/bigsizeship-backend/build
+        uses: $GITHUB_WORKSPACE/.github/actions/bigsizeship-backend/build@master
         with:
           env: ${{ github.event.inputs.ENV }}
 
@@ -58,7 +58,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Deploy
-        uses: $GITHUB_WORKSPACE/.github/actions/bigsizeship-backend/deploy
+        uses: $GITHUB_WORKSPACE/.github/actions/bigsizeship-backend/deploy@master
         with:
           env: ${{ github.event.inputs.ENV }}
           tag: ${{ github.event.inputs.IMAGE_TAG }}
