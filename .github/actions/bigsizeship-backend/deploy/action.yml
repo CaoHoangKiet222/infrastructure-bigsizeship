@@ -9,7 +9,7 @@ inputs:
     required: true
   PROJECT_NAME:
     description: "PROJECT NAME (Ex: bigsizeship-backend)"
-  required: true
+    required: true
   SSH_HOST:
     description: "The hostname or IP address of the SSH server to connect to"
     required: true
