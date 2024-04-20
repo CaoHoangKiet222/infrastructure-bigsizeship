@@ -1,24 +1,22 @@
-# https://blog.derlin.ch/github-actions-reusable-workflow-docker-images
-
 name: Build, tag, push docker image
 description: Build, tag & push docker image
 
 inputs:
-  publish_to_github_cr:
+  PUBLISH_TO_GITHUB_CR:
     type: boolean
-    description: "Whether to publish the image to Github Container Registry."
+    description: "Whether to publish the image to Github Container Registry"
     required: false
     default: false
-  docker_context:
-    description: "Optional input to set docker context."
+  DOCKER_CONTEXT:
+    description: "Optional input to set docker context"
     required: false
     default: "."
-  docker_platforms:
-    description: "Optional input list to set docker target platforms for build."
+  DOCKER_PLATFORMS:
+    description: "Optional input list to set docker target platforms for build"
     required: false
     default: "linux/amd64"
-  no_cache:
-    description: "Optional input to not use cache when building the image."
+  NO_CACHE:
+    description: "Optional input to not use cache when building the image"
     required: false
     default: "false"
   env:
@@ -71,13 +69,13 @@ runs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
-        context: ${{ inputs.docker_context }}
-        platforms: ${{ inputs.docker_platforms }}
-        push: ${{ inputs.publish_to_github_cr }}
+        context: ${{ inputs.DOCKER_CONTEXT }}
+        platforms: ${{ inputs.DOCKER_PLATFORMS }}
+        push: ${{ inputs.PUBLISH_TO_GITHUB_CR }}
         tags: ${{ steps.github-metadata.outputs.tags }}
         labels: ${{ steps.github-metadata.outputs.labels }}
-        no-cache: ${{ inputs.no_cache }}
-        file: ${{ inputs.context }}/build/Dockerfiles/${{ env.PROJECT_NAME }}/Dockerfile
+        no-cache: ${{ inputs.NO_CACHE }}
+        file: ${{ inputs.DOCKER_CONTEXT }}/build/Dockerfiles/${{ env.PROJECT_NAME }}/Dockerfile
         # use layer caching. Don't forget mode=max to also cache the build image
         # (vs only the final image - mode: min)
         cache-from: type=gha
