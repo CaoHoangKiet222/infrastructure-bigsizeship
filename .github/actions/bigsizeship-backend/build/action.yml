@@ -82,7 +82,7 @@ runs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
-        context: ${{ inputs.DOCKER_CONTEXT }}
+        context: ${{ inputs.DOCKER_CONTEXT }}/${{ inputs.PROJECT_NAME }}
         platforms: ${{ inputs.DOCKER_PLATFORMS }}
         push: ${{ inputs.PUBLISH_TO_GITHUB_CR }}
         tags: ${{ steps.github-metadata.outputs.tags }}
