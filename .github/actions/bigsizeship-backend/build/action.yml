@@ -35,9 +35,9 @@ inputs:
       - prod
 
 outputs: 
-  image-tag:
-    description: "Output image tag"
-    value: ${{ steps.image-tag.outputs.image-tag }}
+  image-name:
+    description: "Output image name"
+    value: ${{ steps.get-image-name.outputs.image-name }}
 
 runs: 
   using: composite
@@ -54,7 +54,7 @@ runs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ github.token }}
-#        password: ${{ secrets.ACCESS_TOKEN }}
+        # password: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Extract Docker metadata
       id: github-metadata
@@ -62,7 +62,7 @@ runs:
       with:
         images: ghcr.io/${{ github.repository }}
         tags: |
-          type=semver,pattern={{ version }},value=${{ inputs.version }}
+          type=semver,pattern={{ version }},value=${{ inputs.GIT_TAG }}
           type=ref,prefix=,suffix=-{{ sha }},event=tag
           type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') }}
         flavor: |
@@ -71,13 +71,13 @@ runs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-#        token: ${{ secrets.ACCESS_TOKEN }}
+        # token: ${{ secrets.ACCESS_TOKEN }}
         repository: caotuankietc3a/${{ inputs.PROJECT_NAME }}
         ref: ${{ inputs.GIT_TAG }}
         path: ${{ inputs.PROJECT_NAME }}
 
     - name: Build and push Docker image
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v5
       with:
         context: ${{ inputs.DOCKER_CONTEXT }}/${{ inputs.PROJECT_NAME }}
         platforms: ${{ inputs.DOCKER_PLATFORMS }}
@@ -91,7 +91,7 @@ runs:
         cache-from: type=gha
         cache-to: type=gha,mode=max,ignore-error=true
 
-    - name: Output image tag
-      id: image-tag
+    - name: Output image name
+      id: get-image-name
       shell: bash
-      run: echo "image-tag=${{ steps.github-metadata.outputs.tags }}" >> $GITHUB_OUTPUT
+      run: echo "image-name=${{ steps.github-metadata.outputs.tags }}" >> $GITHUB_OUTPUT

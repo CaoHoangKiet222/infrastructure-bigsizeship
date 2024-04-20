@@ -1,10 +1,9 @@
 name: Deploy stack
 
 inputs:
-  IMAGE_TAG:
+  IMAGE_NAME:
     description: The Docker image tag to deploy
-    required: false
-    default: latest
+    required: true
   STACK_NAME:
     description: The service to use in Cloud Run (will be created if not exists)
     required: true
@@ -28,14 +27,19 @@ runs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ github.token }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
+        # password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract Docker metadata
+      id: github-metadata
+      uses: docker/metadata-action@v4
+      with:
+        images: ghcr.io/${{ github.repository }}
 
     - name: Pull Docker Image
       shell: bash
       id: pull
       run: |
-        image=ghcr.io/${{ github.repository }}
-        docker pull $image:${{ inputs.IMAGE_TAG }}
+        docker pull ${{ inputs.IMAGE_NAME }}
 
     - name: Run/Update stack services
       shell: bash
