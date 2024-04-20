@@ -1,4 +1,5 @@
-name: Deploy stack
+name: Deploy swarm stack services
+description: Deploy swarm stack services
 
 inputs:
   IMAGE_NAME:
