@@ -2,21 +2,34 @@ name: Deploy stack
 
 inputs:
   IMAGE_NAME:
-    description: The Docker image tag to deploy
+    description: "The Docker image tag to deploy"
     required: true
   STACK_NAME:
-    description: The service to use in Cloud Run (will be created if not exists)
+    description: "The stack name to use when deploy"
     required: true
+  PROJECT_NAME:
+    description: "PROJECT NAME (Ex: bigsizeship-backend)"
+  required: true
+  SSH_HOST:
+    description: "The hostname or IP address of the SSH server to connect to"
+    required: true
+  SSH_USERNAME:
+    description: "The username used for SSH authentication"
+    required: true
+  SSH_PASSWORD:
+    description: "The password used for SSH authentication"
+    required: true
+  SSH_PORT:
+    description: "The port number used for SSH connections (default is typically 22)"
+    required: false
+    default: 22
   ENV:
     type: choise
     description: "Optional environment"
     required: false
-    options: 
+    options:
       - stag
       - prod
-  PROJECT_NAME:
-    description: 'PROJECT NAME (Ex: bigsizeship-backend)'
-    required: true
 
 runs:
   using: composite
@@ -27,20 +40,20 @@ runs:
     - name: Copy files to VPS
       uses: appleboy/scp-action@v0.1.7
       with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USERNAME }}
-        password: ${{ secrets.VPS_PASSWORD }}
-        port: ${{ secrets.PORT }}
+        host: ${{ inputs.SSH_HOST }}
+        username: ${{ inputs.SSH_USERNAME }}
+        password: ${{ inputs.SSH_PASSWORD }}
+        port: ${{ inputs.SSH_PORT }}
         source: "./docker-swarm/${{ inputs.PROJECT_NAME }}/*"
         target: "~/app/${{ inputs.PROJECT_NAME }}"
 
     - name: Deploy in VPS
       uses: appleboy/ssh-action@v1.0.3
       with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USERNAME }}
-        password: ${{ secrets.VPS_PASSWORD }}
-        port: ${{ secrets.VPS_PORT }}
+        host: ${{ inputs.SSH_HOST }}
+        username: ${{ inputs.SSH_USERNAME }}
+        password: ${{ inputs.SSH_PASSWORD }}
+        port: ${{ inputs.SSH_PORT }}
         script: |
           echo ${{ github.token }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker pull ${{ inputs.IMAGE_NAME }}
