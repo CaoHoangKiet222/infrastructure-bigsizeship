@@ -1,6 +1,9 @@
 name: Build and Deploy BigsizeShip-Backend
 
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
     inputs: 
       PROJECT_NAME:
@@ -35,7 +38,7 @@ jobs:
 #=============== CI/CD stag environment ===============#
   bigsizeship-backend-STAG-build:
     name: bigsizeship-backend STAG build
-    if: ${{ github.event.inputs.ENV == 'stag' }}
+    if: ${{ inputs.ENV == 'stag' }}
     runs-on: ubuntu-latest
     outputs:
       job_status: ${{ job.status }}
@@ -44,9 +47,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build, tag & push docker image
-        uses: ./.github/actions/${{ github.event.inputs.PROJECT_NAME }}@master
+        uses: ./.github/actions/${{ inputs.PROJECT_NAME }}@master
         with:
-          env: ${{ github.event.inputs.ENV }}
+          env: ${{ inputs.ENV }}
 
 
   bigsizeship-backend-STAG-deploy:
@@ -58,10 +61,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Deploy
-        uses: ./.github/actions/${{ github.event.inputs.PROJECT_NAME }}@master
+        uses: ./.github/actions/${{ inputs.PROJECT_NAME }}@master
         with:
-          env: ${{ github.event.inputs.ENV }}
-          tag: ${{ github.event.inputs.IMAGE_TAG }}
+          env: ${{ inputs.ENV }}
+          tag: ${{ inputs.IMAGE_TAG }}
           stack_name: bigsizeship_be_staging
 
       # Clean Workspace
