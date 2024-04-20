@@ -76,7 +76,7 @@ runs:
         tags: ${{ steps.github-metadata.outputs.tags }}
         labels: ${{ steps.github-metadata.outputs.labels }}
         no-cache: ${{ inputs.NO_CACHE }}
-        file: ${{ inputs.DOCKER_CONTEXT }}/build/Dockerfiles/${{ env.PROJECT_NAME }}/Dockerfile
+        file: ${{ inputs.DOCKER_CONTEXT }}/build/Dockerfiles/${{ inputs.PROJECT_NAME }}/Dockerfile
         # use layer caching. Don't forget mode=max to also cache the build image
         # (vs only the final image - mode: min)
         cache-from: type=gha
