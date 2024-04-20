@@ -43,8 +43,8 @@ jobs:
         uses: ./.github/actions/bigsizeship-backend/build
         with:
           ENV: ${{ inputs.ENV }}
-          PROJECT_NAME: ${{ inputs.PROJECT_NAME }}
           GIT_TAG: ${{ inputs.GIT_TAG }}
+          PROJECT_NAME: ${{ inputs.PROJECT_NAME }}
 
 
   bigsizeship-backend-STAG-deploy:
@@ -58,9 +58,10 @@ jobs:
       - name: Deploy
         uses: ./.github/actions/bigsizeship-backend/deploy
         with:
-          env: ${{ inputs.ENV }}
-          tag: ${{ inputs.IMAGE_TAG }}
-          stack_name: bigsizeship_be_staging
+          ENV: ${{ inputs.ENV }}
+          IMAGE_TAG: ${{ inputs.IMAGE_TAG }}
+          STACK_NAME: bigsizeship_be_staging
+          PROJECT_NAME: ${{ inputs.PROJECT_NAME }}
 
       # Clean Workspace
       - name: Clean Workspace

@@ -1,75 +1,67 @@
-name: Cloud Run Deploy
+name: Deploy stack
 
 inputs:
-  image_tag:
+  IMAGE_TAG:
     description: The Docker image tag to deploy
     required: false
     default: latest
-  stack_name:
+  STACK_NAME:
     description: The service to use in Cloud Run (will be created if not exists)
     required: true
-  env:
+  ENV:
     type: choise
     description: "Optional environment"
     required: false
     options: 
       - stag
       - prod
-
-env:
-  PROJECT_NAME: "bigsizeship-backend"
-  DOCKERCOMPOSE_FILE: "docker-compose.yml"
+  PROJECT_NAME:
+    description: 'PROJECT NAME (Ex: bigsizeship-backend)'
+    required: true
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Setup vars
-        id: vars
-        run: |
-          echo "::set-output name=stack_name::${{ github.event.inputs.stack_name }}"
-          echo "::set-output name=tag::${{ github.event.inputs.image_tag }}"
-          echo "::set-output name=env::${{ github.event.inputs.env }}"
-
       - name: Login to Docker Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ github.token }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull Docker Image
         id: pull
         run: |
           image=ghcr.io/${{ github.repository }}
+          docker pull $image:${{ inputs.IMAGE_TAG }}
 
-          docker pull $image:${{ steps.vars.outputs.tag }}
-          echo "::set-output name=img::$image"
-
-      - name: Checkout
-        uses: actions/checkout@v4
+#      - name: Checkout
+#        uses: actions/checkout@v4
       
-      - name: Run/Update services 
+      - name: Run/Update stack services
         run: |
           # Add commands to run tests on the deployed services
-          COMPOSE_FILES=(
-              "$PWD/docker-swarm/${{ env.PROJECT_NAME }}/global/efk/fluent-bit/docker-compose.yml"
-              $([ ${{ steps.vars.outputs.env }} == "stag" ] && echo "$PWD/docker-swarm/${{ env.PROJECT_NAME }}/postgres/docker-compose.yml")
-              "$PWD/docker-swarm/${{ env.PROJECT_NAME }}/global/redis/docker-compose.yml"
-              "$PWD/docker-swarm/${{ env.PROJECT_NAME }}/strapi/${{ steps.vars.outputs.env }}/docker-compose.yml"
+          docker_compose_yml="docker-compose.${{ inputs.ENV }}.yml"
+          compose_files=(
+              "$PWD/docker-swarm/${{ inputs.PROJECT_NAME }}/global/efk/fluent-bit/docker-compose.yml"
+              $([ ${{ inputs.ENV }} == "stag" ] && echo "$PWD/docker-swarm/${{ inputs.PROJECT_NAME }}/postgres/docker-compose.yml")
+              "$PWD/docker-swarm/${{ inputs.PROJECT_NAME }}/global/redis/docker-compose.yml"
+              "$PWD/docker-swarm/${{ inputs.PROJECT_NAME }}/strapi/${{ inputs.ENV }}/docker-compose.yml"
           )
 
-          COMPOSE_YML=""
-          for FILE in "${COMPOSE_FILES[@]}"; do
-              COMPOSE_YML="${COMPOSE_YML:+${COMPOSE_YML} }-c ${FILE}"
+          compose_yml=""
+          for file in "${compose_files[@]}"; do
+              compose_yml="${compose_yml:+${compose_yml} }-c ${file}"
           done
-          echo "Compose yml files: ${COMPOSE_YML}"
+          echo "Compose yml files: ${compose_yml}"
 
-          docker stack deploy -c $PWD/docker-swarm/${{ env.PROJECT_NAME }}/${{ steps.vars.outputs.env }}/reverse-proxy-traefik/docker-compose.yml --prune ${{ steps.vars.outputs.stack_name }}_proxy
+          docker stack deploy -c ./docker-swarm/${{ inputs.PROJECT_NAME }}/${{ inputs.ENV }}/reverse-proxy-traefik/docker-compose.yml --prune ${{ inputs.STACK_NAME }}_proxy
 
-          docker stack config ${COMPOSE_YML} > ${{ env.DOCKERCOMPOSE_FILE }}
+          docker stack config ${compose_yml} > ${docker_compose_yml}
 
-          docker stack deploy -c ${DOCKERCOMPOSE_FILE} --prune --with-registry-auth ${{ steps.vars.outputs.stack_name }}
+          docker stack deploy -c ${docker_compose_yml} --prune --with-registry-auth ${{ inputs.STACK_NAME }}
 
           docker service ls
